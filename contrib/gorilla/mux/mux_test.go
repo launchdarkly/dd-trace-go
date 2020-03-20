@@ -114,6 +114,22 @@ func TestSpanOptions(t *testing.T) {
 	assert.Equal(2, spans[0].Tag(ext.SamplingPriority))
 }
 
+func TestIncludeName(t *testing.T) {
+	assert := assert.New(t)
+	mt := mocktracer.Start()
+	defer mt.Stop()
+	mux := NewRouter(WithIncludeName())
+	mux.Handle("/200", okHandler()).Name("my route name")
+	r := httptest.NewRequest("GET", "http://localhost/200", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, r)
+
+	spans := mt.FinishedSpans()
+	assert.Equal(1, len(spans))
+	s := spans[0]
+	assert.Equal("GET /200 (my route name)", spans[0].Tag(ext.ResourceName))
+}
+
 // TestImplementingMethods is a regression tests asserting that all the mux.Router methods
 // returning the router will return the modified traced version of it and not the original
 // router.

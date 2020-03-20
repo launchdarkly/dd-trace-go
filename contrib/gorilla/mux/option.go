@@ -15,6 +15,7 @@ import (
 type routerConfig struct {
 	serviceName   string
 	spanOpts      []ddtrace.StartSpanOption // additional span options to be applied
+	includeName   bool
 	analyticsRate float64
 }
 
@@ -61,5 +62,12 @@ func WithAnalyticsRate(rate float64) RouterOption {
 		} else {
 			cfg.analyticsRate = math.NaN()
 		}
+	}
+}
+
+// WithIncludeName adds the route name to resource name if there is one
+func WithIncludeName() RouterOption {
+	return func(cfg *routerConfig) {
+		cfg.includeName = true
 	}
 }

@@ -7,6 +7,7 @@
 package mux // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 
@@ -103,6 +104,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if r.Match(req, &match) && match.Route != nil {
 		if r, err := match.Route.GetPathTemplate(); err == nil {
 			route = r
+		}
+		if r.config.includeName {
+			if name := match.Route.GetName(); name != "" {
+				route = route + fmt.Sprintf(` (%s)`, name)
+			}
 		}
 		if h, err := match.Route.GetHostTemplate(); err == nil {
 			spanopts = append(spanopts, tracer.Tag("mux.host", h))
